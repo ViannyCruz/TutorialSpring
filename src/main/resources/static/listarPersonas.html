@@ -1,10 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Listar Personas</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+    <!-- Custom styles -->
+    <style>
+        /* General styles */
+        * {
+
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+
+        }
+
+        nav a:hover {
+            background-color: #660000;
+        }
+
+
+
+        .table th,
+        .table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .action-button {
+            color: #fff;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-button.delete {
+            background-color: #990000;
+        }
+
+        .action-button.delete:hover {
+            background-color: #660000;
+        }
+
+        .action-button.update {
+            background-color: #333333;
+        }
+
+        .action-button.update:hover {
+            background-color: #000000;
+        }
+
+        .action-button.view {
+            background-color: #007bff;
+        }
+
+        .action-button.view:hover {
+            background-color: #0056b3;
+        }
+
+
+
+        /* Custom styles for navigation and header */
+        .navbar {
+            background-color: #990000 !important; /* Red */
+        }
+
+
+
+        /* Custom styles for navigation links */
+        .navbar-nav .nav-link {
+            color: #ffffff !important; /* White text for links */
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #cccccc !important; /* Light gray text on hover */
+        }
+
+        /* Main content styles */
+        .container-tuti {
+            margin-top: 150px;
+        }
+
+    </style>
 </head>
 <body>
-$END$
+<!-- Navigation bar -->
+<nav class="navbar navbar-expand-lg bg-secondary text-uppercase fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="#page-top">Looking cool</a>
+        <button class="navbar-toggler text-uppercase font-weight-bold bg-primary text-white rounded" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            Menu
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item mx-0 mx-lg-1"><a class="nav-link py-3 px-0 px-lg-3 rounded" href="index.html">Home</a></li>
+                <li class="nav-item mx-0 mx-lg-1"><a class="nav-link py-3 px-0 px-lg-3 rounded" href="crearPersona.html">Crear Persona</a></li>
+                <li class="nav-item mx-0 mx-lg-1"><a class="nav-link py-3 px-0 px-lg-3 rounded" href="listarPersonas.html">Personas</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Main content -->
+<div class="container-tuti ">
+    <h1>Listado de Personas</h1>
+    <table class="table table-bordered">
+        <!-- Table headers -->
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <!-- Table body (data will be populated dynamically) -->
+        <tbody id="tablaPersonas">
+        <!-- Person rows will be added here -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Bootstrap JS and custom script -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // Función para buscar y completar la tabla con datos de personas
+    function fetchAndPopulateTable() {
+    fetch('/personas') // Replace '/personas' with your actual API endpoint
+            .then(response => response.json())
+            .then(personas => {
+                let tabla = document.getElementById('tablaPersonas');
+
+                personas.forEach(persona => {
+                    let fila = document.createElement('tr');
+
+                    // Add person details
+                    let id = document.createElement('td');
+                    id.textContent = persona.id;
+                    fila.appendChild(id);
+
+                    let nombre = document.createElement('td');
+                    nombre.textContent = persona.nombre;
+                    fila.appendChild(nombre);
+
+                    let apellido = document.createElement('td');
+                    apellido.textContent = persona.apellido;
+                    fila.appendChild(apellido);
+
+                    // Add action buttons
+                    let acciones = document.createElement('td');
+                    let botonEliminar = crearBoton('Eliminar', 'delete', () => eliminarPersona(persona.id));
+                    let botonActualizar = crearBoton('Actualizar', 'update', () => actualizarPersona(persona.id));
+                    let botonVer = crearBoton('Ver', 'view', () => verPersona(persona.id));
+                    acciones.appendChild(botonEliminar);
+                    acciones.appendChild(botonActualizar);
+                    acciones.appendChild(botonVer);
+                    fila.appendChild(acciones);
+
+                    tabla.appendChild(fila);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Función para crear botones de acción
+    function crearBoton(texto, clase, onclickHandler) {
+        let boton = document.createElement('button');
+        boton.textContent = texto;
+        boton.className = 'action-button ' + clase;
+        boton.onclick = onclickHandler;
+        return boton;
+    }
+
+    //Función para eliminar una persona
+    function eliminarPersona(id) {
+        fetch('/personas/' + id, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (response.status === 204) {
+                    console.log('Persona eliminada con éxito');
+                    window.location.href = "listarPersonas.html";
+
+
+
+                    // fetchAndPopulateTable(); // Refresh the table after deletion
+                } else if (response.status === 404) {
+                    console.error('Persona no encontrada');
+                } else {
+                    console.error('Error al eliminar la persona:', response);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Función para actualizar una persona (redireccionar a la página de actualización)
+    function actualizarPersona(id) {
+        localStorage.setItem("idTuti", id);
+
+        fetch('/personas/' + id, {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Guarda los datos en localStorage o sessionStorage
+                localStorage.setItem('persona', JSON.stringify(data));
+
+                // Abre la nueva página
+                window.location.href = "modificarPersona.html";
+            })
+            .catch(error => console.error('Error:', error));
+
+    }
+
+    // Función para ver una persona (redireccionar a ver página)
+    function verPersona(id) {
+        fetch('/personas/' + id, {
+            method: 'GET'
+        })
+            .then(response => response.json()) // Asegúrate de convertir la respuesta a JSON
+            .then(data => {
+                // Guarda los datos en localStorage o sessionStorage
+                localStorage.setItem('persona', JSON.stringify(data));
+
+                // Abre la nueva página
+                window.location.href = "verPersona.html";
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Llama a la función para buscar y completar la tabla cuando se carga la página
+    fetchAndPopulateTable();
+</script>
 </body>
 </html>
